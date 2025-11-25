@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block head %}
+  <meta name="description" content="Discover and download curated digital artworks from independent artists.">
+  <meta property="og:title" content="ArtMarket — Digital Art Marketplace">
+  <meta property="og:description" content="Discover and download curated digital artworks from independent artists.">
+  {% if items and items.0.file_preview %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ items.0.file_preview.url }}">
+  {% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+{% block title %}Catalog — Art Marketplace{% endblock %}
+{% block content %}
+<div class="ms-auto d-flex gap-2">
+  <form method="get" class="d-flex">
+    <select class="form-select me-2" name="cat" onchange="this.form.submit()">
+      <option value="">All categories</option>
+      {% for c in categories %}
+        <option value="{{ c.slug }}" {% if c.slug == cat %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select me-2" name="ordering" onchange="this.form.submit()">
+      <option value="-created_at" {% if ordering == "-created_at" %}selected{% endif %}>Newest</option>
+      <option value="price" {% if ordering == "price" %}selected{% endif %}>Price ↑</option>
+      <option value="-price" {% if ordering == "-price" %}selected{% endif %}>Price ↓</option>
+      <option value="title" {% if ordering == "title" %}selected{% endif %}>Title A–Z</option>
+    </select>
+    <input type="hidden" name="q" value="{{ q }}">
+  </form>
+
+  {% if q or cat or ordering != "-created_at" %}
+    <a class="btn btn-outline-light" href="/">Clear filters</a>
+  {% endif %}
+</div>
+
+<br>
+
+<div class="row g-4">
+  {% for a in items %}
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <a class="text-decoration-none text-reset" href="{% url 'web_artwork_detail' a.slug %}">
+        <div class="card h-100">
+          {% if a.file_preview %}
+            <img src="{{ a.file_preview.url }}" class="card-img-top" alt="{{ a.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ a.title }}</h5>
+            <p class="card-text text-secondary small mb-2">{{ a.artist.display_name }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">${{ a.price }}</span>
+              <p class="card-text text-secondary small mb-2">
+            <a class="text-decoration-none text-secondary" href="{% url 'web_artist' a.artist.user.username %}">
+                {{ a.artist.display_name }}
+            </a>
+            </p>
+
+              {% with catobj=a.categories.all|first %}
+                {% if catobj %}<span class="badge text-bg-dark">{{ catobj.name }}</span>{% endif %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  {% empty %}
+    <div class="col">
+      <div class="text-center py-5">
+        <h4 class="mb-2">Nothing found</h4>
+        {% if q or cat %}
+          <p class="text-secondary">Try clearing filters or search.</p>
+          <a class="btn btn-outline-light" href="/">Reset filters</a>
+        {% else %}
+          <p class="text-secondary">No artworks yet. Check back later.</p>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4 d-flex justify-content-center">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&cat={{ cat }}&ordering={{ ordering }}&page={{ page_obj.previous_page_number }}">« Prev</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">« Prev</span></li>
+    {% endif %}
+
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&cat={{ cat }}&ordering={{ ordering }}&page={{ page_obj.next_page_number }}">Next »</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next »</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

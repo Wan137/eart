@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block head %}
+  <meta name="description" content="{% if art.description %}{{ art.description|truncatechars:160 }}{% else %}Digital artwork by {{ art.artist.display_name }}{% endif %}">
+  <meta property="og:title" content="{{ art.title }} — ArtMarket">
+  <meta property="og:description" content="{% if art.description %}{{ art.description|truncatechars:160 }}{% else %}Digital artwork by {{ art.artist.display_name }}{% endif %}">
+  {% if art.file_preview %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ art.file_preview.url }}">
+  {% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+
+
+{% block title %}{{ art.title }} — Art Marketplace{% endblock %}
+
+{% block content %}
+<div class="row g-5">
+  <div class="col-12 col-lg-7">
+    {% if art.file_preview %}
+      <img class="img-fluid rounded-4 shadow" src="{{ art.file_preview.url }}" alt="{{ art.title }}">
+    {% endif %}
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <a href="/" class="text-secondary small text-decoration-none">← Back to catalog</a>
+    <h1 class="mb-2 mt-2">{{ art.title }}</h1>
+    <p class="text-secondary mb-1">
+      by <strong>{{ art.artist.display_name }}</strong>
+    </p>
+
+    <div class="mt-3 d-flex align-items-center gap-2">
+      {% for c in art.categories.all %}
+        <span class="badge text-bg-secondary">{{ c.name }}</span>
+      {% empty %}
+        <span class="text-secondary small">No category</span>
+      {% endfor %}
+    </div>
+
+    <p class="fs-3 fw-semibold mt-4 mb-3">${{ art.price }}</p>
+
+    <!-- Форма добавления в корзину: DRF примет form-urlencoded; CSRF обязателен -->
+    <form class="d-flex gap-2" method="post" action="{% url 'web_cart_add' %}">
+    {% csrf_token %}
+    <input type="hidden" name="artwork_id" value="{{ art.id }}">
+    <button class="btn btn-accent btn-lg">Add to cart</button>
+    <a class="btn btn-outline-light btn-lg" href="/cart/">View cart</a>
+    </form>
+
+    {% if art.description %}
+      <div class="mt-4">
+        <h5 class="mb-2">Description</h5>
+        <p class="text-secondary">{{ art.description }}</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if related %}
+  <h3 class="mt-5 mb-3">More from {{ art.artist.display_name }}</h3>
+  <div class="row g-4">
+    {% for a in related %}
+      <div class="col-6 col-lg-3">
+        <a class="text-decoration-none text-reset" href="{% url 'web_artwork_detail' a.slug %}">
+          <div class="card h-100">
+            {% if a.file_preview %}
+              <img src="{{ a.file_preview.url }}" class="card-img-top" alt="{{ a.title }}">
+            {% endif %}
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <span class="small">{{ a.title }}</span>
+                <span class="small fw-semibold">${{ a.price }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

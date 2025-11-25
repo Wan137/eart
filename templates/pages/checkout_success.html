@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Order placed{% endblock %}
+{% block content %}
+<h1>Thank you for your purchase!</h1>
+<p class="text-secondary">Order #{{ order.id }}</p>
+
+{% if order.items %}
+  <div class="card p-3">
+    <h5 class="mb-3">Your downloads</h5>
+    <ul class="list-unstyled">
+      {% for it in order.items %}
+        <li class="d-flex justify-content-between align-items-center py-2 border-top">
+          <div>
+            <div class="fw-semibold">{{ it.artwork.title }}</div>
+            {% if it.token_expires_at %}
+              <div class="text-secondary small">Expires: {{ it.token_expires_at }}</div>
+            {% endif %}
+          </div>
+          {% if it.download_url %}
+            <a class="btn btn-accent" href="{{ it.download_url }}">Download</a>
+          {% else %}
+            <span class="text-danger small">No download link</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% else %}
+  <p>No items in response.</p>
+{% endif %}
+
+<a class="btn btn-outline-light mt-3" href="/">Back to catalog</a>
+{% endblock %}
