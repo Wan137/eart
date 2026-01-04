@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load humanize %} {% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-2">Order #{{ order.id }}</h1>
+<div class="text-secondary mb-4">
+  {% if created_at %}Placed: {{ created_at|date:"Y-m-d H:i" }} · {% endif %}
+  Status: <span class="badge {% if status == 'paid' %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+    {{ status|title }}
+  </span>
+</div>
+
+<div class="card p-3">
+  <ul class="list-unstyled mb-3">
+    {% for it in items %}
+      <li class="d-flex justify-content-between align-items-center py-2 border-top">
+        <div>
+          <div class="fw-medium">{{ it.title }}</div>
+          <div class="text-secondary small">
+            Qty: {{ item.qty }} · RM {{ item.unit_price|intcomma }}
+            {% if it.expires_at %} · Expires: {{ it.expires_at|date:"Y-m-d H:i" }}{% endif %}
+            {% if it.download_url %} · Remaining: {{ it.remaining }}{% endif %}
+          </div>
+        </div>
+        {% for it in order.items.all %}
+  <li>
+        {{ it.artwork.title }} —
+        {% if it.downloadtoken and it.downloadtoken.remaining > 0 %}
+        <a href="{{ it.downloadtoken.get_url }}">Download</a>
+        (left: {{ it.downloadtoken.remaining }}, until {{ it.downloadtoken.expires_at|date:"Y-m-d" }})
+        {% else %}
+        <span class="text-muted">No active download</span>
+        {% endif %}
+        </li>
+        {% endfor %}
+        <div>
+          {% if it.download_url %}
+            <a class="btn btn-accent btn-sm" href="{{ it.download_url }}">Download</a>
+          {% else %}
+            <span class="badge text-bg-warning">No active download</span>
+          {% endif %}
+        </div>
+        <form method="post" action="{% url 'web_my_order_resend' order.id %}" class="mb-3">
+        {% csrf_token %}
+        <button class="btn btn-outline-light btn-sm">Resend links to email</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <div class="d-flex justify-content-between">
+    <div class="text-secondary">Total</div>
+    <div class="h4 mb-0">RM {{ total|intcomma }}</div>
+  </div>
+</div>
+
+<a class="btn btn-outline-light mt-3" href="{% url 'web_my_orders' %}">← Back to My Orders</a>
+
+{% endblock %}

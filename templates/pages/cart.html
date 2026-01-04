@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Your Cart{% endblock %}
+
+{% block content %}
+<h1>Your Cart</h1>
+
+{% if cart.data %}
+  <table class="table text-light align-middle">
+    <thead>
+      <tr><th>Artwork</th><th class="text-end">Price</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in cart %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              {% if item.art.file_preview %}
+                <img src="{{ item.art.file_preview.url }}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:12px;">
+              {% endif %}
+              <div>
+                <div class="fw-semibold">{{ item.art.title }}</div>
+                <div class="text-secondary small">{{ item.art.artist.display_name }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="text-end">RM{{ item.art.price }}</td>
+          <td class="text-end">
+            <a href="{% url 'web_cart_remove' item.art.id %}" class="btn btn-sm btn-outline-danger">Remove</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Total</th>
+        <th class="text-end">RM{{ cart.total }}</th>
+        <th></th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <a href="{% url 'web_checkout' %}" class="btn btn-accent btn-lg">Proceed to checkout</a>
+{% else %}
+  <p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

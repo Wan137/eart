@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}My Artworks — Studio{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <h1 class="me-auto">My Artworks</h1>
+  <a class="btn btn-accent" href="{% url 'web_studio_create' %}">New artwork</a>
+</div>
+
+{% if items %}
+  <table class="table text-light align-middle">
+    <thead><tr><th>Title</th><th>Status</th><th>Price</th><th>Created</th></tr></thead>
+    <tbody>
+      {% for a in items %}
+        <tr>
+          <td><a class="text-reset text-decoration-none" href="{% url 'web_artwork_detail' a.slug %}">{{ a.title }}</a></td>
+          <td>
+            {% if a.is_active %}
+              <span class="badge text-bg-success">Active</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Pending</span>
+            {% endif %}
+          </td>
+          <td>RM{{ a.price}}</td>
+          <td>{{ a.created_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="text-center py-5">
+    <p class="text-secondary">You haven’t uploaded any artworks yet.</p>
+    <a class="btn btn-accent" href="{% url 'web_studio_create' %}">Upload your first artwork</a>
+  </div>
+{% endif %}
+{% endblock %}

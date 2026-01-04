@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}My Favorites — ArtMarket{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4 fw-bold">My Favorites <span class="text-secondary fs-4">({{ favorites.count }})</span></h2>
+
+{% if favorites %}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+  {% for fav in favorites %}
+    <div class="col">
+      <div class="card h-100 border-secondary position-relative">
+        
+        <a href="{% url 'web_artwork_detail' fav.artwork.slug %}" class="stretched-link"></a>
+        {% if fav.artwork.file_preview %}
+            <img src="{{ fav.artwork.file_preview.url }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+        {% else %}
+            <div class="card-img-top bg-secondary" style="height: 250px;"></div>
+        {% endif %}
+
+        <div class="card-body bg-dark text-light">
+           <h5 class="card-title text-truncate fw-bold">{{ fav.artwork.title }}</h5>
+           <p class="text-secondary small mb-2">{{ fav.artwork.artist.display_name }}</p>
+           <span class="fw-bold" style="color: var(--accent);">RM {{ fav.artwork.price|intcomma }}</span>
+        </div>
+
+        <button class="btn btn-sm btn-dark border position-absolute top-0 end-0 m-2" style="z-index: 50;"
+                hx-post="{% url 'toggle_favorite' fav.artwork.slug %}"
+                hx-target="closest .col"
+                hx-swap="outerHTML">
+            ✕
+        </button>
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+  <div class="text-center py-5 text-secondary">
+    <h4>You haven't liked anything yet.</h4>
+    <a href="/" class="btn btn-outline-light mt-3">Go to Catalog</a>
+  </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="display-1 text-success mb-4">✔</div>
+    <h1 class="fw-bold text-white">Payment Successful!</h1>
+    <p class="text-secondary fs-4">Thank you for your purchase.</p>
+    <p class="text-secondary">Your digital art is now available in your collection.</p>
+    
+    <div class="mt-5">
+        <a href="{% url 'web_catalog' %}" class="btn btn-outline-light me-2">Back to Catalog</a>
+        <a href="{% url 'web_my_orders' %}" class="btn btn-accent">View My Orders</a>
+    </div>
+</div>
+{% endblock %}

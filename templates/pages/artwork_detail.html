@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ artwork.title }} — ArtMarket{% endblock %}
+
+{% block content %}
+
+<div class="row g-5 mt-2">
+    
+    <div class="col-md-6 mb-4">
+        <div class="rounded-4 overflow-hidden border border-secondary position-relative shadow-lg" style="background: #000;">
+            {% if artwork.file_preview %}
+                <img src="{{ artwork.file_preview.url }}" class="img-fluid w-100" alt="{{ artwork.title }}" 
+                     style="object-fit: contain; max-height: 600px;">
+            {% else %}
+                <div class="d-flex align-items-center justify-content-center text-secondary" style="height: 400px; background: #1a1a1a;">
+                    <span>No Preview Available</span>
+                </div>
+            {% endif %}
+            
+            {% if artwork.categories.first %}
+            <span class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-75 border border-secondary text-white backdrop-blur">
+                {{ artwork.categories.first.name }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="ps-md-4">
+            <h1 class="display-5 fw-bold mb-2">{{ artwork.title }}</h1>
+            <p class="fs-5 text-secondary mb-4">
+                by <a href="{% url 'web_artist' artwork.artist.user.username %}" class="text-white text-decoration-none fw-bold border-bottom border-secondary pb-1">{{ artwork.artist.display_name }}</a>
+            </p>
+
+            <div class="mb-4">
+                <span class="display-6 fw-bold" style="color: var(--accent);">RM {{ artwork.price|intcomma }}</span>
+            </div>
+
+            <div class="d-flex gap-3 mb-5">
+                {% if request.user.is_authenticated %}
+                    <form action="{% url 'web_cart_add' artwork.id %}" method="post" class="flex-grow-1">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-accent btn-lg w-100 py-3 fw-bold shadow-lg">
+                            Add to Cart
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-accent btn-lg w-100 py-3 fw-bold">Login to Buy</a>
+                {% endif %}
+                
+                {% if request.user.is_authenticated %}
+                <button class="btn btn-outline-light btn-lg px-4" 
+                        hx-post="{% url 'toggle_favorite' artwork.slug %}" 
+                        hx-swap="outerHTML">
+                    ♥
+                </button>
+                {% endif %}
+            </div>
+
+            <div class="p-4 rounded-3 border border-secondary" style="background: rgba(255,255,255,0.03);">
+                <h5 class="fw-bold mb-3 text-white">Description</h5>
+                <p class="text-secondary mb-0" style="line-height: 1.8;">
+                    {{ artwork.description|default:"No description provided by the artist."|linebreaks }}
+                </p>
+            </div>
+            
+            <div class="mt-4 text-secondary small">
+                <p class="mb-1">Uploaded: {{ artwork.created_at|date:"F d, Y" }}</p>
+                <p>Format: Digital Download</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="border-secondary my-5">
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h3 class="fw-bold mb-4">Reviews <span class="text-secondary">({{ reviews.count }})</span></h3>
+
+        {% if request.user.is_authenticated %}
+            <form method="post" class="mb-5 p-4 rounded-3 border border-secondary" style="background: rgba(255,255,255,0.02);">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="text-secondary small fw-bold mb-2">YOUR RATING</label>
+                    {{ form.rating }}
+                </div>
+                <div class="mb-3">
+                    <label class="text-secondary small fw-bold mb-2">YOUR COMMENT</label>
+                    {{ form.text }}
+                </div>
+                <button type="submit" class="btn btn-sm btn-outline-light px-4">Post Review</button>
+            </form>
+        {% endif %}
+
+        {% for review in reviews %}
+            <div class="mb-4 pb-3 border-bottom border-secondary">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center fw-bold text-white small" style="width: 32px; height: 32px;">
+                             {{ review.user.username|slice:":1"|upper }}
+                        </div>
+                        <span class="fw-bold text-white">{{ review.user.username }}</span>
+                    </div>
+                    <span class="text-warning">★ {{ review.rating }}/5</span>
+                </div>
+                <p class="text-light opacity-75 mb-1">{{ review.text }}</p>
+                <small class="text-secondary" style="font-size: 0.75rem;">{{ review.created_at|timesince }} ago</small>
+            </div>
+        {% empty %}
+            <div class="text-center py-4 text-secondary">
+                <p>No reviews yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

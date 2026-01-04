@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load catalog_extras %}  {% block title %}Catalog — Art Marketplace{% endblock %}
+
+{% block content %}
+
+<div class="p-5 mb-5 rounded-4 position-relative overflow-hidden" 
+     style="background: linear-gradient(135deg, #1a1a1a 0%, #2d1b4e 100%); border: 1px solid rgba(139, 92, 246, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+  <div style="position: absolute; top: -100px; right: -50px; width: 300px; height: 300px; background: #8B5CF6; filter: blur(120px); opacity: 0.4;"></div>
+  <div class="container-fluid py-2 position-relative z-1">
+     <h1 class="display-4 fw-bold text-white mb-3" style="font-family: 'Playfair Display', serif;">
+       Discover Unique <span style="color: #A78BFA;">Digital Art</span>
+     </h1>
+     <p class="fs-5 text-secondary mb-4" style="max-width: 600px;">
+       The premium marketplace for independent creators.
+     </p>
+     <a href="#catalog-grid" class="btn btn-accent btn-lg px-4">Start Exploring</a>
+  </div>
+</div>
+
+<div id="catalog-grid" class="d-flex justify-content-end align-items-center gap-2 mb-4">
+  {% if q or cat or ordering != "-created_at" %}
+    <a class="btn btn-outline-danger d-flex align-items-center px-3" href="/" style="height: 38px;">✕ Clear</a>
+  {% endif %}
+  <form method="get" class="d-flex gap-2">
+    <select class="form-select bg-dark text-light border-secondary" name="cat" onchange="this.form.submit()" style="cursor: pointer; width: 180px;">
+      <option value="">All Categories</option>
+      {% for c in categories %}
+        <option value="{{ c.slug }}" {% if c.slug == cat %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select bg-dark text-light border-secondary" name="ordering" onchange="this.form.submit()" style="cursor: pointer; width: 180px;">
+      <option value="-created_at" {% if ordering == "-created_at" %}selected{% endif %}>Newest</option>
+      <option value="price" {% if ordering == "price" %}selected{% endif %}>Price ↑</option>
+      <option value="-price" {% if ordering == "-price" %}selected{% endif %}>Price ↓</option>
+    </select>
+    <input type="hidden" name="q" value="{{ q }}">
+  </form>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+  {% for a in items %}
+    <div class="col">
+      <div class="card h-100 position-relative border-secondary overflow-hidden">
+          
+          <span class="position-absolute top-0 start-0 badge bg-danger m-2 shadow-sm" style="z-index: 10;">NEW</span>
+
+          {% if request.user.is_authenticated %}
+             {% include "partials/like_button.html" with is_liked=request.user|has_liked:a artwork=a %}
+          {% endif %}
+
+          <div class="position-relative">
+            <a href="{% url 'web_artwork_detail' a.slug %}" class="stretched-link"></a>
+            
+            {% if a.file_preview %}
+              <img src="{{ a.file_preview.url }}" class="card-img-top" alt="{{ a.title }}" 
+                   style="height: 250px; width: 100%; object-fit: cover;">
+            {% else %}
+              <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
+                  <span class="text-white-50">No Image</span>
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="card-body bg-dark text-light d-flex flex-column pointer-event">
+            <h5 class="card-title text-truncate fs-5 fw-bold mb-3">{{ a.title }}</h5>
+            
+            <div class="mt-auto d-flex justify-content-between align-items-end">
+              <span class="fw-bold fs-5 text-nowrap" style="color: var(--accent);">RM {{ a.price|intcomma }}</span>
+              <div class="text-end lh-1" style="min-width: 0;">
+                <div class="text-secondary small fw-bold text-truncate mb-1">{{ a.artist.display_name }}</div>
+                {% with catobj=a.categories.all|first %}
+                  {% if catobj %}
+                    <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.7rem;">{{ catobj.name }}</span>
+                  {% endif %}
+                {% endwith %}
+              </div>
+            </div> 
+          </div>
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-5 d-flex justify-content-center">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link bg-dark text-secondary border-secondary">{{ page_obj.number }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

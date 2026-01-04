@@ -1,0 +1,14 @@
+Hi {{ full_name|default:"there" }},
+
+Here are your download links for Order #{{ order.id }}:
+
+{% for it in items %}
+• {{ it.title }} — {{ it.url }}
+  (Remaining: {{ it.remaining }}{% if it.expires_at %}, Expires: {{ it.expires_at|date:"Y-m-d H:i" }}{% endif %})
+{% endfor %}
+
+If a link reports that it has expired or no remaining downloads,
+open your order page and click "Resend links" to refresh the tokens.
+
+Thank you for your purchase!
+ArtMarket

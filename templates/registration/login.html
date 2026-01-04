@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+
+{% block content %}
+<h1>Sign in</h1>
+
+<form method="post" action="{% url 'login' %}">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {% for err in form.non_field_errors %}{{ err }}<br>{% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="mb-3">
+    <label for="id_username" class="form-label">Username</label>
+    <input type="text"
+           name="username"
+           id="id_username"
+           class="form-control"
+           required
+           autofocus
+           value="{{ form.username.value|default_if_none:'' }}">
+    {% for err in form.username.errors %}
+      <div class="text-danger small">{{ err }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_password" class="form-label">Password</label>
+    <input type="password"
+           name="password"
+           id="id_password"
+           class="form-control"
+           required>
+    {% for err in form.password.errors %}
+      <div class="text-danger small">{{ err }}</div>
+    {% endfor %}
+  </div>
+
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="btn btn-accent">Login</button>
+</form>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}New Artwork — Studio{% endblock %}
+{% block content %}
+<a href="{% url 'web_studio_list' %}" class="text-secondary small text-decoration-none">← Back to Studio</a>
+<h1 class="mt-2 mb-3">New Artwork</h1>
+
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <h4>Validation Errors</h4>
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<form method="post" enctype="multipart/form-data" class="mt-3">
+
+<form method="post" enctype="multipart/form-data" class="mt-3">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <label class="form-label">Title</label>
+      {{ form.title }}
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label">Slug (optional)</label>
+      {{ form.slug }}
+    </div>
+    <div class="col-12">
+      <label class="form-label">Description</label>
+      {{ form.description }}
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label">Price</label>
+      {{ form.price }}
+    </div>
+    <div class="col-12 col-md-8">
+      <label class="form-label">Category</label>
+      {{ form.categories }}
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label">Preview image</label>
+      {{ form.file_preview }}
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label">Original file</label>
+      {{ form.file_original }}
+    </div>
+  </div>
+  <button class="btn btn-accent mt-4">Submit for review</button>
+</form>
+{% endblock %}

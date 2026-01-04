@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">My Orders</h1>
+
+{% if orders %}
+  <div class="vstack gap-4">
+    {% for o in orders %}
+      <div class="card p-3">
+        <div class="d-flex align-items-center mb-2">
+          <div class="me-auto">
+            <div class="fw-semibold">Order #{{ o.id }}</div>
+            <div class="text-secondary small">{{ o.created_at|date:"Y-m-d H:i" }}</div>
+          </div>
+          <span class="badge {% if o.status == 'paid' %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+            {{ o.status|title }}
+          </span>
+        </div>
+
+        <ul class="list-unstyled mb-3">
+          {% for it in o.items %}
+            <li class="d-flex justify-content-between align-items-center py-2 border-top">
+              <div>
+                <div class="fw-medium">{{ it.title }}</div>
+                <div class="text-secondary small">Qty: {{ it.qty }}</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <div class="text-secondary">RM{{ it.unit_price }}</div>
+                <div class="fw-semibold">
+                  <a href="{% url 'web_my_order_detail' o.id %}">Order #{{ o.id }}</a>
+                </div>
+                {% if it.download_url %}
+                  <a class="btn btn-accent btn-sm" href="{{ it.download_url }}">Download</a>
+                {% else %}
+                  <span class="badge text-bg-warning">No download</span>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="d-flex justify-content-between">
+          <div class="text-secondary">Total</div>
+          <div class="fw-semibold">RM{{ o.total }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="mt-4">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="text-secondary">You have no orders yet.</div>
+{% endif %}
+
+{% endblock %}
